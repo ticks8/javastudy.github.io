@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://ticks8.github.io</id>
     <title>Gridea</title>
-    <updated>2020-12-09T14:49:14.243Z</updated>
+    <updated>2020-12-09T15:52:26.403Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://ticks8.github.io"/>
     <link rel="self" href="https://ticks8.github.io/atom.xml"/>
@@ -10,6 +10,52 @@
     <logo>https://ticks8.github.io/images/avatar.png</logo>
     <icon>https://ticks8.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[final、finally与finalize的区别]]></title>
+        <id>https://ticks8.github.io/post/finalfinally-yu-finalize-de-qu-bie/</id>
+        <link href="https://ticks8.github.io/post/finalfinally-yu-finalize-de-qu-bie/">
+        </link>
+        <updated>2020-12-09T06:53:53.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="1final">1.final</h3>
+<h4 id="11修饰类">1.1修饰类</h4>
+<p>表明该类不能被其他类继承</p>
+<h4 id="12修饰方法">1.2修饰方法</h4>
+<p>使用final方法的原因主要有两个：</p>
+<p>(1) 把方法锁定，以防止继承类对其进行更改。</p>
+<p>(2) 效率，在早期的java版本中，会将final方法转为内嵌调用。但若方法过于庞大，可能在性能上不会有多大提升。因此在最近版本中，不需要final方法进行这些优化了。final方法意味着“最后的、最终的”含义，即此方法不能被重写。</p>
+<p>注意：若父类中final方法的访问权限为private，将导致子类中不能直接继承该方法，因此，此时可以在子类中定义相同方法名的函数，此时不会与重写final的矛盾，而是在子类中重新地定义了新方法。<br>
+代码：</p>
+<pre><code>class A{
+    private final void getName(){
+
+    }
+}
+
+public class B extends A{
+    public void getName(){
+
+    }
+
+    public static void main(String[]args){
+        System.out.println(&quot;OK&quot;);
+    }
+}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://ticks8.github.io/post-images/1607527490231.PNG" alt="" loading="lazy"></figure>
+<h4 id="13-修饰变量">1.3 修饰变量</h4>
+<p>final成员变量表示常量，只能被赋值一次，赋值后其值不再改变。类似于C++中的const。</p>
+<p>final修饰一个成员变量（属性），必须要显示初始化。这里有两种初始化方式</p>
+<h3 id="2finally">2.finally</h3>
+<p>finally作为异常处理的一部分，它只能用在try/catch语句中，并且附带一个语句块。</p>
+<p>finally不执行的情况<br>
+　finally对应的try语句块得到执行的情况下，finally语句块才会执行。执行try语句块之前已经返回或抛出异常便不会执行finally里的内容，<br>
+<img src="https://ticks8.github.io/post-images/1607528888192.PNG" alt="" loading="lazy"></p>
+<h3 id="3finalize">3.finalize</h3>
+<p>finalize()是在java.lang.Object里定义的，也就是说每一个对象都有这么个方法。这个方法在gc启动，该对象被回收的时候被调用。<br>
+特殊情况下，需要程序员实现finalize，当对象被回收的时候释放一些资源，比如：一个socket链接，在对象初始化时创建，整个生命周期内有效，那么就需要实现finalize，关闭这个链接。<br>
+　　使用finalize还需要注意一个事，调用super.finalize();</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[java的多态详解]]></title>
         <id>https://ticks8.github.io/post/java-de-duo-tai-xiang-jie/</id>
