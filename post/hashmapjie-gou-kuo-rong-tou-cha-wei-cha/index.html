@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HashMap【结构、扩容、头插尾插】 | Gridea</title>
-<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608209291931">
+<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608209563390">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://ticks8.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="HashMap【结构、扩容、头插尾插】 | Gridea - Atom Feed" href="https://ticks8.github.io/atom.xml">
@@ -13,11 +13,10 @@
 
     <meta name="description" content="1.结构
 1.7及之前是数组+链表，1.8是数组+链表+红黑树。
-###2.扩容
+###2.扩容（只讲1.7版）
 源码解析：
   public V put(K key, V value) {
-        if (table == EMPTY_TABLE) {
-    ..." />
+        if (table == EMPTY_TABLE..." />
     <meta name="keywords" content="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -27,7 +26,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://ticks8.github.io">
-  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608209291931" alt="">
+  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608209563390" alt="">
   </a>
   <h1 class="site-title">
     Gridea
@@ -96,7 +95,7 @@
               <div class="post-content">
                 <h3 id="1结构">1.结构</h3>
 <p>1.7及之前是数组+链表，1.8是数组+链表+红黑树。</p>
-<p>###2.扩容<br>
+<p>###2.扩容（只讲1.7版）<br>
 源码解析：</p>
 <pre><code>  public V put(K key, V value) {
         if (table == EMPTY_TABLE) {
