@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://ticks8.github.io</id>
     <title>Gridea</title>
-    <updated>2020-12-17T12:54:46.375Z</updated>
+    <updated>2020-12-17T13:46:12.862Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://ticks8.github.io"/>
     <link rel="self" href="https://ticks8.github.io/atom.xml"/>
@@ -10,6 +10,17 @@
     <logo>https://ticks8.github.io/images/avatar.png</logo>
     <icon>https://ticks8.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[IO流【字节流和字符流】]]></title>
+        <id>https://ticks8.github.io/post/io-liu-zi-jie-liu-he-zi-fu-liu/</id>
+        <link href="https://ticks8.github.io/post/io-liu-zi-jie-liu-he-zi-fu-liu/">
+        </link>
+        <updated>2020-12-09T07:58:56.000Z</updated>
+        <content type="html"><![CDATA[<p>InputStream 和OutputStream,两个是为字节流设计的,主要用来处理字节或二进制对象,<br>
+Reader和 Writer.两个是为字符流（一个字符占两个字节）设计的,主要用来处理字符或字符串.<br>
+余下待写</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[final、finally与finalize的区别]]></title>
         <id>https://ticks8.github.io/post/finalfinally-yu-finalize-de-qu-bie/</id>
