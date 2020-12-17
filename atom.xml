@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://ticks8.github.io</id>
     <title>Gridea</title>
-    <updated>2020-12-09T15:53:32.646Z</updated>
+    <updated>2020-12-17T12:51:54.070Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://ticks8.github.io"/>
     <link rel="self" href="https://ticks8.github.io/atom.xml"/>
@@ -160,6 +160,123 @@ public class Test{
 }
 </code></pre>
 <figure data-type="image" tabindex="1"><img src="https://ticks8.github.io/post-images/1607523806806.PNG" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[HashMap【结构、扩容、头插尾插】]]></title>
+        <id>https://ticks8.github.io/post/hashmapjie-gou-kuo-rong-tou-cha-wei-cha/</id>
+        <link href="https://ticks8.github.io/post/hashmapjie-gou-kuo-rong-tou-cha-wei-cha/">
+        </link>
+        <updated>2020-12-08T23:57:40.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="1结构">1.结构</h3>
+<p>1.7及之前是数组+链表，1.8是数组+链表+红黑树。</p>
+<p>###2.扩容<br>
+源码解析：</p>
+<pre><code>  public V put(K key, V value) {
+        if (table == EMPTY_TABLE) {
+            inflateTable(threshold);
+        }
+        if (key == null)
+            return putForNullKey(value);
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        for (Entry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
+                V oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+        modCount++;
+        addEntry(hash, key, value, i);
+        return null;
+    }
+</code></pre>
+<p>从代码中可以看出若添加的数据的key是已经存在的那么新的value会替代旧的value，若是新的key值则执行addEntry(hash, key, value, i),接下来我们来看看addEntry(hash,key,value,i)的源码</p>
+<pre><code> if ((size &gt;= threshold) &amp;&amp; (null != table[bucketIndex])) {
+            resize(2 * table.length);
+            hash = (null != key) ? hash(key) : 0;
+            bucketIndex = indexFor(hash, table.length);
+        }
+		// 1.2、若容量足够，则创建1个新的数组元素（Entry） 并放入到数组中
+        createEntry(hash, key, value, bucketIndex);
+        ~~~
+resize(2*table.length)就是我们需要了解的扩容函数，接下来进入源码
+
+</code></pre>
+<pre><code>void resize(int newCapacity) {  
+
+// 1、保存旧数组（old table） 
+Entry[] oldTable = table;  
+
+// 2、保存旧容量（old capacity ），即数组长度
+int oldCapacity = oldTable.length; 
+
+// 3、若旧容量已经是系统默认最大容量了，那么将阈值设置成整型的最大值，返回   
+if (oldCapacity == MAXIMUM_CAPACITY) {  
+    threshold = Integer.MAX_VALUE;  
+    return;  
+}  
+
+// 4、根据新容量（2倍容量）新建1个数组，即newTable 
+Entry[] newTable = new Entry[newCapacity];  
+
+//5、将旧数组上的数据（键值对）转移到新table中，从而完成扩容
+transfer(newTable, initHashSeedAsNeeded(newCapacity));
+   
+// 6、新数组table引用到HashMap的table属性上
+table = newTable;
+   
+// 7、重新设置阈值 
+threshold = (int)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);}
+</code></pre>
+<p>再看  transfer(newTable, initHashSeedAsNeeded(newCapacity))</p>
+<pre><code> /**
+   * 作用：将旧数组上的数据（键值对）转移到新table中，从而完成扩容
+   * 过程：按旧链表的正序遍历链表、在新链表的头部依次插入。但是这样会导致扩容完成后，链表逆序
+   */ 	
+void transfer(Entry[] newTable, boolean rehash) {
+        int newCapacity = newTable.length;
+        //通过遍历 旧数组，将旧数组上的数据（键值对）转移到新数组中
+        for (Entry&lt;K,V&gt; e : table) {
+            while(null != e) {
+                /*
+                 1、遍历以该数组元素为首的链表
+                 2、转移链表时，因是单链表，故要保存下1个结点，否则转移后链表会断开
+                 */
+                Entry&lt;K,V&gt; next = e.next;
+                if (rehash) {
+                    e.hash = null == e.key ? 0 : hash(e.key);
+                }
+                 //重新计算每个元素的存储位置
+                int i = indexFor(e.hash, newCapacity);
+                
+                //这个地方暂时先放着，后面讲死循环链表的时候会讲到
+                e.next = newTable[i];
+                //讲当前元素，赋给新数组的对应下标位置。
+                newTable[i] = e;
+                // 访问下1个Entry链上的元素，如此不断循环，直到遍历完该链表上的所有节点
+                e = next;
+            }
+        }
+    }
+
+</code></pre>
+<p>transfer(Entry[] newTable, boolean rehash)，注意newTable的长度为原来的2倍，可以看出是用头插法把原数组的值插入新数组。</p>
+<h3 id="q为什么hashmap多线程不安全呢">Q:为什么hashmap多线程不安全呢？</h3>
+<pre><code>   因为hashmap用数组+链表。数组是固定长度，链表太长就需要扩充数组长度进行rehash减少链表长度。如果两个线程同时触发扩容，在移动节点时会导致一个链表中的2个节点相互引用，从而生成环链表
+</code></pre>
+<h3 id="q为什么hashmap数组长度要是2的幂呢">Q:为什么hashmap数组长度要是2的幂呢</h3>
+<pre><code>   因为 n 永远是2的次幂，所以 n-1 通过 二进制表示，永远都是尾端以连续1的形式表示（00001111，00000011）
+</code></pre>
+<p>当(n - 1) 和 hash 做与运算时，会保留hash中 后 x 位的 1，<br>
+例如 00001111 &amp; 10000011 = 00000011</p>
+<p>这样做有2个好处</p>
+<p>&amp;运算速度快，至少比%取模运算块<br>
+能保证 索引值 肯定在 capacity 中，不会超出数组长度<br>
+(n - 1) &amp; hash，当n为2次幂时，会满足一个公式：(n - 1) &amp; hash = hash % n</p>
 ]]></content>
     </entry>
     <entry>

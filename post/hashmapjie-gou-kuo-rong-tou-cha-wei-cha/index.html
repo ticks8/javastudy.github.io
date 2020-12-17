@@ -1,0 +1,292 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HashMap【结构、扩容、头插尾插】 | Gridea</title>
+<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608209291931">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://ticks8.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="HashMap【结构、扩容、头插尾插】 | Gridea - Atom Feed" href="https://ticks8.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="1.结构
+1.7及之前是数组+链表，1.8是数组+链表+红黑树。
+###2.扩容
+源码解析：
+  public V put(K key, V value) {
+        if (table == EMPTY_TABLE) {
+    ..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://ticks8.github.io">
+  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608209291931" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              HashMap【结构、扩容、头插尾插】
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-12-09
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h3 id="1结构">1.结构</h3>
+<p>1.7及之前是数组+链表，1.8是数组+链表+红黑树。</p>
+<p>###2.扩容<br>
+源码解析：</p>
+<pre><code>  public V put(K key, V value) {
+        if (table == EMPTY_TABLE) {
+            inflateTable(threshold);
+        }
+        if (key == null)
+            return putForNullKey(value);
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        for (Entry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
+                V oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+        modCount++;
+        addEntry(hash, key, value, i);
+        return null;
+    }
+</code></pre>
+<p>从代码中可以看出若添加的数据的key是已经存在的那么新的value会替代旧的value，若是新的key值则执行addEntry(hash, key, value, i),接下来我们来看看addEntry(hash,key,value,i)的源码</p>
+<pre><code> if ((size &gt;= threshold) &amp;&amp; (null != table[bucketIndex])) {
+            resize(2 * table.length);
+            hash = (null != key) ? hash(key) : 0;
+            bucketIndex = indexFor(hash, table.length);
+        }
+		// 1.2、若容量足够，则创建1个新的数组元素（Entry） 并放入到数组中
+        createEntry(hash, key, value, bucketIndex);
+        ~~~
+resize(2*table.length)就是我们需要了解的扩容函数，接下来进入源码
+
+</code></pre>
+<pre><code>void resize(int newCapacity) {  
+
+// 1、保存旧数组（old table） 
+Entry[] oldTable = table;  
+
+// 2、保存旧容量（old capacity ），即数组长度
+int oldCapacity = oldTable.length; 
+
+// 3、若旧容量已经是系统默认最大容量了，那么将阈值设置成整型的最大值，返回   
+if (oldCapacity == MAXIMUM_CAPACITY) {  
+    threshold = Integer.MAX_VALUE;  
+    return;  
+}  
+
+// 4、根据新容量（2倍容量）新建1个数组，即newTable 
+Entry[] newTable = new Entry[newCapacity];  
+
+//5、将旧数组上的数据（键值对）转移到新table中，从而完成扩容
+transfer(newTable, initHashSeedAsNeeded(newCapacity));
+   
+// 6、新数组table引用到HashMap的table属性上
+table = newTable;
+   
+// 7、重新设置阈值 
+threshold = (int)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);}
+</code></pre>
+<p>再看  transfer(newTable, initHashSeedAsNeeded(newCapacity))</p>
+<pre><code> /**
+   * 作用：将旧数组上的数据（键值对）转移到新table中，从而完成扩容
+   * 过程：按旧链表的正序遍历链表、在新链表的头部依次插入。但是这样会导致扩容完成后，链表逆序
+   */ 	
+void transfer(Entry[] newTable, boolean rehash) {
+        int newCapacity = newTable.length;
+        //通过遍历 旧数组，将旧数组上的数据（键值对）转移到新数组中
+        for (Entry&lt;K,V&gt; e : table) {
+            while(null != e) {
+                /*
+                 1、遍历以该数组元素为首的链表
+                 2、转移链表时，因是单链表，故要保存下1个结点，否则转移后链表会断开
+                 */
+                Entry&lt;K,V&gt; next = e.next;
+                if (rehash) {
+                    e.hash = null == e.key ? 0 : hash(e.key);
+                }
+                 //重新计算每个元素的存储位置
+                int i = indexFor(e.hash, newCapacity);
+                
+                //这个地方暂时先放着，后面讲死循环链表的时候会讲到
+                e.next = newTable[i];
+                //讲当前元素，赋给新数组的对应下标位置。
+                newTable[i] = e;
+                // 访问下1个Entry链上的元素，如此不断循环，直到遍历完该链表上的所有节点
+                e = next;
+            }
+        }
+    }
+
+</code></pre>
+<p>transfer(Entry[] newTable, boolean rehash)，注意newTable的长度为原来的2倍，可以看出是用头插法把原数组的值插入新数组。</p>
+<h3 id="q为什么hashmap多线程不安全呢">Q:为什么hashmap多线程不安全呢？</h3>
+<pre><code>   因为hashmap用数组+链表。数组是固定长度，链表太长就需要扩充数组长度进行rehash减少链表长度。如果两个线程同时触发扩容，在移动节点时会导致一个链表中的2个节点相互引用，从而生成环链表
+</code></pre>
+<h3 id="q为什么hashmap数组长度要是2的幂呢">Q:为什么hashmap数组长度要是2的幂呢</h3>
+<pre><code>   因为 n 永远是2的次幂，所以 n-1 通过 二进制表示，永远都是尾端以连续1的形式表示（00001111，00000011）
+</code></pre>
+<p>当(n - 1) 和 hash 做与运算时，会保留hash中 后 x 位的 1，<br>
+例如 00001111 &amp; 10000011 = 00000011</p>
+<p>这样做有2个好处</p>
+<p>&amp;运算速度快，至少比%取模运算块<br>
+能保证 索引值 肯定在 capacity 中，不会超出数组长度<br>
+(n - 1) &amp; hash，当n为2次幂时，会满足一个公式：(n - 1) &amp; hash = hash % n</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#1%E7%BB%93%E6%9E%84">1.结构</a></li>
+<li><a href="#q%E4%B8%BA%E4%BB%80%E4%B9%88hashmap%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E5%91%A2">Q:为什么hashmap多线程不安全呢？</a></li>
+<li><a href="#q%E4%B8%BA%E4%BB%80%E4%B9%88hashmap%E6%95%B0%E7%BB%84%E9%95%BF%E5%BA%A6%E8%A6%81%E6%98%AF2%E7%9A%84%E5%B9%82%E5%91%A2">Q:为什么hashmap数组长度要是2的幂呢</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://ticks8.github.io/post/hello-gridea/">
+              <h3 class="post-title">
+                Hello Gridea
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://ticks8.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
