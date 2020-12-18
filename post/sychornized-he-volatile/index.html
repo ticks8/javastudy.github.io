@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>sychornized和volatile | Gridea</title>
-<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608260258857">
+<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608260602515">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://ticks8.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="sychornized和volatile | Gridea - Atom Feed" href="https://ticks8.github.io/atom.xml">
@@ -25,7 +25,7 @@ synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit �
       <div class="main-content">
         <div class="site-header">
   <a href="https://ticks8.github.io">
-  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608260258857" alt="">
+  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608260602515" alt="">
   </a>
   <h1 class="site-title">
     Gridea
@@ -95,20 +95,20 @@ synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit �
                 <h3 id="sychornized">sychornized</h3>
 <p>Sychornized在语句块前加和在方法前加是不一样的。</p>
 <h4 id="a在语句块前加">a.在语句块前加</h4>
-<p><img src="https://ticks8.github.io/post-images/1608210789713.png" alt="" loading="lazy"><br>
+<p><img src="https://ticks8.github.io/post-images/1608260528380.png" alt="" loading="lazy"><br>
 synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit 指令，其中 monitorenter 指令指向同步代码块的开始位置，monitorexit 指令则指明同步代码块的结束位置。</p>
 <p>在执行monitorenter时，会尝试获取对象的锁，如果锁的计数器为 0 则表示锁可以被获取，获取后将锁计数器设为 1 也就是加 1。</p>
 <p>在执行 monitorexit 指令后，将锁计数器设为 0，表明锁被释放。如果获取对象锁失败，那当前线程就要阻塞等待，直到锁被另外一个线程释放为止。</p>
 <h4 id="b在方法前加">b.在方法前加</h4>
-<p><img src="https://ticks8.github.io/post-images/1608211143708.png" alt="" loading="lazy"><br>
+<p><img src="https://ticks8.github.io/post-images/1608260566928.png" alt="" loading="lazy"><br>
 synchronized 修饰的方法并没有 monitorenter 指令和 monitorexit 指令，取得代之的确实是 ACC_SYNCHRONIZED 标识，该标识指明了该方法是一个同步方法。JVM 通过该 ACC_SYNCHRONIZED 访问标志来辨别一个方法是否声明为同步方法，从而执行相应的同步调用。</p>
 <h3 id="volatile">volatile</h3>
 <p>volatile保证可见性<br>
 首先让我们看一下jmm模型<br>
-<img src="https://ticks8.github.io/post-images/1608212091089.png" alt="" loading="lazy"><br>
+<img src="https://ticks8.github.io/post-images/1608260581625.png" alt="" loading="lazy"><br>
 在 JDK1.2 之前，Java 的内存模型实现总是从主存（即共享内存）读取变量，是不需要进行特别的注意的。而在当前的 Java 内存模型下，线程可以把变量保存本地内存（比如机器的寄存器）中，而不是直接在主存中进行读写。这就可能造成一个线程在主存中修改了一个变量的值，而另外一个线程还继续使用它在寄存器中的变量值的拷贝，造成数据的不一致。<br>
 而用了volatile后则变成这样<br>
-<img src="https://ticks8.github.io/post-images/1608212312693.png" alt="" loading="lazy"><br>
+<img src="https://ticks8.github.io/post-images/1608260590308.png" alt="" loading="lazy"><br>
 volatile保证有序性</p>
 <pre><code>public class Singleton {
 
