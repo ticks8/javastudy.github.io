@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://ticks8.github.io</id>
     <title>Gridea</title>
-    <updated>2020-12-18T03:07:31.934Z</updated>
+    <updated>2020-12-18T03:07:45.289Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://ticks8.github.io"/>
     <link rel="self" href="https://ticks8.github.io/atom.xml"/>
@@ -10,6 +10,59 @@
     <logo>https://ticks8.github.io/images/avatar.png</logo>
     <icon>https://ticks8.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[sychornized和volatile]]></title>
+        <id>https://ticks8.github.io/post/sychornized-he-volatile/</id>
+        <link href="https://ticks8.github.io/post/sychornized-he-volatile/">
+        </link>
+        <updated>2020-12-17T05:02:43.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="sychornized">sychornized</h3>
+<p>Sychornized在语句块前加和在方法前加是不一样的。</p>
+<h4 id="a在语句块前加">a.在语句块前加</h4>
+<p><img src="https://ticks8.github.io/post-images/1608260528380.png" alt="" loading="lazy"><br>
+synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit 指令，其中 monitorenter 指令指向同步代码块的开始位置，monitorexit 指令则指明同步代码块的结束位置。</p>
+<p>在执行monitorenter时，会尝试获取对象的锁，如果锁的计数器为 0 则表示锁可以被获取，获取后将锁计数器设为 1 也就是加 1。</p>
+<p>在执行 monitorexit 指令后，将锁计数器设为 0，表明锁被释放。如果获取对象锁失败，那当前线程就要阻塞等待，直到锁被另外一个线程释放为止。</p>
+<h4 id="b在方法前加">b.在方法前加</h4>
+<p><img src="https://ticks8.github.io/post-images/1608260566928.png" alt="" loading="lazy"><br>
+synchronized 修饰的方法并没有 monitorenter 指令和 monitorexit 指令，取得代之的确实是 ACC_SYNCHRONIZED 标识，该标识指明了该方法是一个同步方法。JVM 通过该 ACC_SYNCHRONIZED 访问标志来辨别一个方法是否声明为同步方法，从而执行相应的同步调用。</p>
+<h3 id="volatile">volatile</h3>
+<p>volatile保证可见性<br>
+首先让我们看一下jmm模型<br>
+<img src="https://ticks8.github.io/post-images/1608260581625.png" alt="" loading="lazy"><br>
+在 JDK1.2 之前，Java 的内存模型实现总是从主存（即共享内存）读取变量，是不需要进行特别的注意的。而在当前的 Java 内存模型下，线程可以把变量保存本地内存（比如机器的寄存器）中，而不是直接在主存中进行读写。这就可能造成一个线程在主存中修改了一个变量的值，而另外一个线程还继续使用它在寄存器中的变量值的拷贝，造成数据的不一致。<br>
+而用了volatile后则变成这样<br>
+<img src="https://ticks8.github.io/post-images/1608260590308.png" alt="" loading="lazy"><br>
+volatile保证有序性</p>
+<pre><code>public class Singleton {
+
+    private volatile static Singleton uniqueInstance;
+
+    private Singleton() {
+    }
+
+    public  static Singleton getUniqueInstance() {
+       //先判断对象是否已经实例过，没有实例化过才进入加锁代码
+        if (uniqueInstance == null) {
+            //类对象加锁
+            synchronized (Singleton.class) {
+                if (uniqueInstance == null) {
+                    uniqueInstance = new Singleton();
+                }
+            }
+        }
+        return uniqueInstance;
+    }
+}
+</code></pre>
+<p>这段代码其实是分为三步执行：</p>
+<p>为 uniqueInstance 分配内存空间<br>
+初始化 uniqueInstance<br>
+将 uniqueInstance 指向分配的内存地址</p>
+<p>由于 JVM 具有指令重排的特性，执行顺序有可能变成 1-&gt;3-&gt;2。指令重排在单线程环境下不会出现问题，但是在多线程环境下会导致一个线程获得还没有初始化的实例。例如，线程 T1 执行了 1 和 3，此时 T2 调用 getUniqueInstance() 后发现 uniqueInstance 不为空，因此返回 uniqueInstance，但此时 uniqueInstance 还未被初始化。</p>
+<p>使用 volatile 可以禁止 JVM 的指令重排，保证在多线程环境下也能正常运行。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[IO流【字节流和字符流】]]></title>
         <id>https://ticks8.github.io/post/io-liu-zi-jie-liu-he-zi-fu-liu/</id>
@@ -288,38 +341,6 @@ void transfer(Entry[] newTable, boolean rehash) {
 <p>&amp;运算速度快，至少比%取模运算块<br>
 能保证 索引值 肯定在 capacity 中，不会超出数组长度<br>
 (n - 1) &amp; hash，当n为2次幂时，会满足一个公式：(n - 1) &amp; hash = hash % n</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Hello Gridea]]></title>
-        <id>https://ticks8.github.io/post/hello-gridea/</id>
-        <link href="https://ticks8.github.io/post/hello-gridea/">
-        </link>
-        <updated>2018-12-11T16:00:00.000Z</updated>
-        <summary type="html"><![CDATA[<p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
-✍️  <strong>Gridea</strong> 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
-✍️  <strong>Gridea</strong> 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...</p>
-<!-- more -->
-<p><a href="https://github.com/getgridea/gridea">Github</a><br>
-<a href="https://gridea.dev/">Gridea 主页</a><br>
-<a href="http://fehey.com/">示例网站</a></p>
-<h2 id="特性">特性👇</h2>
-<p>📝  你可以使用最酷的 <strong>Markdown</strong> 语法，进行快速创作</p>
-<p>🌉  你可以给文章配上精美的封面图和在文章任意位置插入图片</p>
-<p>🏷️  你可以对文章进行标签分组</p>
-<p>📋  你可以自定义菜单，甚至可以创建外部链接菜单</p>
-<p>💻  你可以在 <strong>Windows</strong>，<strong>MacOS</strong> 或 <strong>Linux</strong> 设备上使用此客户端</p>
-<p>🌎  你可以使用 <strong>𝖦𝗂𝗍𝗁𝗎𝖻 𝖯𝖺𝗀𝖾𝗌</strong> 或 <strong>Coding Pages</strong> 向世界展示，未来将支持更多平台</p>
-<p>💬  你可以进行简单的配置，接入 <a href="https://github.com/gitalk/gitalk">Gitalk</a> 或 <a href="https://github.com/SukkaW/DisqusJS">DisqusJS</a> 评论系统</p>
-<p>🇬🇧  你可以使用<strong>中文简体</strong>或<strong>英语</strong></p>
-<p>🌁  你可以任意使用应用内默认主题或任意第三方主题，强大的主题自定义能力</p>
-<p>🖥  你可以自定义源文件夹，利用 OneDrive、百度网盘、iCloud、Dropbox 等进行多设备同步</p>
-<p>🌱 当然 <strong>Gridea</strong> 还很年轻，有很多不足，但请相信，它会不停向前 🏃</p>
-<p>未来，它一定会成为你离不开的伙伴</p>
-<p>尽情发挥你的才华吧！</p>
-<p>😘 Enjoy~</p>
 ]]></content>
     </entry>
 </feed>
