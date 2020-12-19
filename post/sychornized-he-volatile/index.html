@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>sychornized和volatile | Gridea</title>
-<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608366919385">
+<link rel="shortcut icon" href="https://ticks8.github.io/favicon.ico?v=1608367021584">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://ticks8.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="sychornized和volatile | Gridea - Atom Feed" href="https://ticks8.github.io/atom.xml">
@@ -25,7 +25,7 @@ synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit �
       <div class="main-content">
         <div class="site-header">
   <a href="https://ticks8.github.io">
-  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608366919385" alt="">
+  <img class="avatar" src="https://ticks8.github.io/images/avatar.png?v=1608367021584" alt="">
   </a>
   <h1 class="site-title">
     Gridea
@@ -95,7 +95,7 @@ synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit �
                 <h3 id="sychornized">sychornized</h3>
 <p>Sychornized在语句块前加和在方法前加是不一样的。</p>
 <h4 id="a在语句块前加">a.在语句块前加</h4>
-<p><img src="https://ticks8.github.io/post-images/1608366868803.png" alt="" loading="lazy"><br>
+<p><img src="https://ticks8.github.io/post-images/1608366987348.png" alt="" loading="lazy"><br>
 synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit 指令，其中 monitorenter 指令指向同步代码块的开始位置，monitorexit 指令则指明同步代码块的结束位置。</p>
 <p>在执行monitorenter时，会尝试获取对象的锁，如果锁的计数器为 0 则表示锁可以被获取，获取后将锁计数器设为 1 也就是加 1。</p>
 <p>在执行 monitorexit 指令后，将锁计数器设为 0，表明锁被释放。如果获取对象锁失败，那当前线程就要阻塞等待，直到锁被另外一个线程释放为止。</p>
